@@ -4,6 +4,7 @@ from db import get_db_connection
 app = Flask(__name__)
 app.secret_key = 'nha_tro_nguyen_duy_secret_key'
 
+# Dữ liệu dự phòng nếu DB chưa sẵn sàng
 FALLBACK_COSO = {
     'Id': 1,
     'Slug': 'nha-tro-nguyen-duy',
@@ -29,10 +30,11 @@ def get_coso_data():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT TOP 1 Id, Slug, TenCoSo, DiaChi, KhuVuc, GiaDien, GiaNuoc FROM CoSo WHERE TenCoSo = N'Nhà trọ Nguyễn Duy'")
+        # Dùng cú pháp SQLite: LIMIT 1 thay vì TOP 1 và bỏ chữ N trước chuỗi
+        cursor.execute("SELECT Id, Slug, TenCoSo, DiaChi, KhuVuc, GiaDien, GiaNuoc FROM CoSo WHERE TenCoSo = 'Nhà trọ Nguyễn Duy' LIMIT 1")
         row = cursor.fetchone()
         if not row:
-            cursor.execute("SELECT TOP 1 Id, Slug, TenCoSo, DiaChi, KhuVuc, GiaDien, GiaNuoc FROM CoSo")
+            cursor.execute("SELECT Id, Slug, TenCoSo, DiaChi, KhuVuc, GiaDien, GiaNuoc FROM CoSo LIMIT 1")
             row = cursor.fetchone()
         
         if row:
@@ -99,7 +101,7 @@ def dat_lich():
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO DatLich (PhongId, HoTenKhach, SoDienThoai, NgayXem, GhiChu, TrangThai)
-            VALUES (?, ?, ?, ?, ?, N'ChoDuyet')
+            VALUES (?, ?, ?, ?, ?, 'ChoDuyet')
         """, (phong_id, ho_ten, sdt, ngay_xem, ghi_chu))
         conn.commit()
         cursor.close()
@@ -126,10 +128,4 @@ def cap_nhat_phong(phong_id):
         conn.commit()
         cursor.close()
         conn.close()
-        flash('Cập nhật thông tin phòng thành công!', 'success')
-    except Exception as e:
-        flash(f'Lỗi cập nhật: {e}', 'danger')
-    return redirect(url_for('quan_ly'))
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+        flash('Cập
