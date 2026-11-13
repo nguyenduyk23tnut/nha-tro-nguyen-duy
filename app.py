@@ -30,7 +30,6 @@ def get_coso_data():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        # Dùng cú pháp SQLite: LIMIT 1 thay vì TOP 1 và bỏ chữ N trước chuỗi
         cursor.execute("SELECT Id, Slug, TenCoSo, DiaChi, KhuVuc, GiaDien, GiaNuoc FROM CoSo WHERE TenCoSo = 'Nhà trọ Nguyễn Duy' LIMIT 1")
         row = cursor.fetchone()
         if not row:
@@ -128,4 +127,10 @@ def cap_nhat_phong(phong_id):
         conn.commit()
         cursor.close()
         conn.close()
-        flash('Cập
+        flash('Cập nhật thông tin phòng thành công!', 'success')
+    except Exception as e:
+        flash(f'Lỗi cập nhật: {e}', 'danger')
+    return redirect(url_for('quan_ly'))
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
