@@ -1,0 +1,13 @@
+HƯỚNG DẪN CHẠY WEB CƠ SỞ - NHÀ TRỌ NGUYỄN DUY
+===================================================
+1. Giải nén thư mục cosotro và mở bằng VS Code.
+2. Cài đặt thư viện (nếu chưa có):
+   pip install -r requirements.txt
+3. Nạp dữ liệu cơ sở vào SQL Server:
+   python seed_data.py
+4. Chạy Web Cơ Sở:
+   python app.py
+   (Truy cập thử tại: http://localhost:5000)
+5. Lấy link Public bằng Pinggy để gắn vào Web Tổng của nhóm trưởng:
+   Mở thêm 1 terminal và chạy:
+   ssh -p 443 -R0:localhost:5000 a.pinggy.io

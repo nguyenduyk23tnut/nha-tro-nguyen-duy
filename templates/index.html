@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ coso.TenCoSo }} - Cổng Thông Tin Cơ Sở Trọ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans">
+
+    <!-- Navbar -->
+    <nav class="bg-blue-700 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-building-user text-2xl text-amber-300"></i>
+                <div>
+                    <span class="font-bold text-lg tracking-wide block leading-tight">{{ coso.TenCoSo }}</span>
+                    <span class="text-xs text-blue-200">Cổng thông tin cơ sở trực thuộc hệ thống</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4 text-sm">
+                <a href="/" class="hover:text-amber-300 font-medium">Danh sách phòng</a>
+                <a href="#bang-gia" class="hover:text-amber-300 font-medium">Bảng giá dịch vụ</a>
+                <a href="/quan-ly" class="bg-amber-400 text-slate-900 px-3 py-1.5 rounded-lg font-semibold hover:bg-amber-300 transition">
+                    <i class="fa-solid fa-user-shield mr-1"></i> Quản lý cơ sở
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="max-w-6xl mx-auto px-4 mt-4">
+          {% for category, message in messages %}
+            <div class="p-4 rounded-lg bg-emerald-100 border border-emerald-400 text-emerald-800 flex justify-between items-center">
+                <span><i class="fa-solid fa-circle-check mr-2"></i>{{ message }}</span>
+                <button onclick="this.parentElement.remove()" class="text-emerald-700 font-bold">&times;</button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Hero Header Cơ Sở -->
+    <header class="bg-gradient-to-r from-blue-800 to-indigo-900 text-white py-10">
+        <div class="max-w-6xl mx-auto px-4 grid md:grid-cols-3 gap-6 items-center">
+            <div class="md:col-span-2 space-y-3">
+                
+                <h1 class="text-3xl md:text-4xl font-extrabold">{{ coso.TenCoSo }}</h1>
+                <p class="text-blue-100 flex items-start gap-2">
+                    <i class="fa-solid fa-location-dot mt-1 text-amber-400"></i>
+                    <span>{{ coso.DiaChi }}</span>
+                </p>
+                <p class="text-sm text-blue-200 leading-relaxed">{{ coso.MoTa }}</p>
+                <div class="pt-2 flex flex-wrap gap-4 text-sm">
+                    <div class="bg-white/10 px-4 py-2 rounded-lg">
+                        <i class="fa-solid fa-user-tie text-amber-300 mr-1"></i> Chủ trọ: <strong>{{ coso.ChuTro }}</strong>
+                    </div>
+                    <div class="bg-white/10 px-4 py-2 rounded-lg">
+                        <i class="fa-solid fa-phone text-amber-300 mr-1"></i> Hotline: <strong>{{ coso.SoDienThoai }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Box Thống kê nhanh -->
+            <div id="bang-gia" class="bg-white text-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
+                <h3 class="font-bold text-base border-b pb-2 text-blue-800">
+                    <i class="fa-solid fa-bolt text-amber-500 mr-1"></i> Thông số & Dịch vụ cơ sở
+                </h3>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-500">Tổng quy mô:</span>
+                    <span class="font-bold">{{ tong_phong }} phòng khép kín</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-500">Tình trạng hiện tại:</span>
+                    <span class="font-bold text-emerald-600">Còn {{ phong_trong }} phòng trống</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-500">Giá điện sinh hoạt:</span>
+                    <span class="font-bold text-amber-600">{{ "{:,.0f}".format(coso.GiaDien) }} đ/kWh</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-500">Giá nước sạch:</span>
+                    <span class="font-bold text-blue-600">{{ "{:,.0f}".format(coso.GiaNuoc) }} đ/m³</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-500">Wifi & Gửi xe:</span>
+                    <span class="font-bold text-emerald-600">Miễn phí 100%</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content: Danh sách phòng -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+            <h2 class="text-2xl font-bold text-slate-800">Danh sách phòng tại {{ coso.TenCoSo }}</h2>
+            <div class="flex space-x-2">
+                <a href="/?trang_thai=ALL" class="px-4 py-2 rounded-lg text-sm font-medium {{ 'bg-blue-600 text-white' if trang_thai_filter == 'ALL' else 'bg-white border text-slate-600 hover:bg-slate-100' }}">
+                    Tất cả ({{ tong_phong }})
+                </a>
+                <a href="/?trang_thai=Trong" class="px-4 py-2 rounded-lg text-sm font-medium {{ 'bg-emerald-600 text-white' if trang_thai_filter == 'Trong' else 'bg-white border text-slate-600 hover:bg-slate-100' }}">
+                    Phòng trống ({{ phong_trong }})
+                </a>
+                <a href="/?trang_thai=DaThue" class="px-4 py-2 rounded-lg text-sm font-medium {{ 'bg-slate-700 text-white' if trang_thai_filter == 'DaThue' else 'bg-white border text-slate-600 hover:bg-slate-100' }}">
+                    Đã thuê ({{ tong_phong - phong_trong }})
+                </a>
+            </div>
+        </div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for p in phongs %}
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition">
+                <div>
+                    <div class="p-4 border-b flex justify-between items-center {{ 'bg-emerald-50' if p.TrangThai == 'Trong' else 'bg-slate-100' }}">
+                        <span class="font-bold text-lg text-slate-800">{{ p.TenPhong }}</span>
+                        {% if p.TrangThai == 'Trong' %}
+                            <span class="bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">Đang trống</span>
+                        {% else %}
+                            <span class="bg-slate-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">Đã có người thuê</span>
+                        {% endif %}
+                    </div>
+                    <div class="p-4 space-y-3">
+                        <div class="flex justify-between items-baseline">
+                            <span class="text-2xl font-extrabold text-blue-700">{{ "{:,.0f}".format(p.GiaThue) }} đ</span>
+                            <span class="text-xs text-slate-500">/ tháng</span>
+                        </div>
+                        <div class="flex gap-4 text-xs text-slate-600">
+                            <span><i class="fa-solid fa-ruler-combined text-blue-500 mr-1"></i> Diện tích: <strong>{{ p.DienTich }} m²</strong></span>
+                            <span><i class="fa-solid fa-bath text-blue-500 mr-1"></i> Khép kín</span>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-relaxed">{{ p.MoTa }}</p>
+                    </div>
+                </div>
+                <div class="p-4 bg-slate-50 border-t">
+                    {% if p.TrangThai == 'Trong' %}
+                        <button onclick="openModal('{{ p.Id }}', '{{ p.TenPhong }}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition">
+                            <i class="fa-regular fa-calendar-check mr-1"></i> Đặt lịch xem phòng ngay
+                        </button>
+                    {% else %}
+                        <button disabled class="w-full bg-slate-300 text-slate-500 font-semibold py-2 rounded-lg cursor-not-allowed">
+                            Phòng hiện đã kín
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <!-- Modal Đặt Lịch -->
+    <div id="bookingModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="font-bold text-lg text-blue-800">Đặt lịch xem <span id="modalRoomName"></span></h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700 text-xl">&times;</button>
+            </div>
+            <form action="/dat-lich" method="POST" class="space-y-4">
+                <input type="hidden" name="phong_id" id="modalRoomId">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Họ và tên sinh viên / khách thuê *</label>
+                    <input type="text" name="ho_ten" required placeholder="Nhập họ tên của bạn" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Số điện thoại / Zalo liên hệ *</label>
+                    <input type="tel" name="sdt" required placeholder="VD: 0912345678" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Ngày dự kiến đến xem *</label>
+                    <input type="date" name="ngay_xem" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Ghi chú thêm</label>
+                    <textarea name="ghi_chu" rows="2" placeholder="VD: Xem phòng lúc 17h chiều sau giờ học..." class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border text-sm font-medium">Hủy</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700">Xác nhận đặt lịch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="bg-slate-900 text-slate-400 py-6 mt-12 text-center text-sm">
+        <p class="font-semibold text-white">{{ coso.TenCoSo }} - Đường 3/2, Thái Nguyên</p>
+        <p class="mt-1">Hệ thống quản lý phòng trọ độc lập • Kết nối cổng thông tin nhóm</p>
+    </footer>
+
+    <script>
+        function openModal(id, name) {
+            document.getElementById('modalRoomId').value = id;
+            document.getElementById('modalRoomName').innerText = name;
+            document.getElementById('bookingModal').classList.remove('hidden');
+            document.getElementById('bookingModal').classList.add('flex');
+        }
+        function closeModal() {
+            document.getElementById('bookingModal').classList.add('hidden');
+            document.getElementById('bookingModal').classList.remove('flex');
+        }
+    </script>
+</body>
+</html>
