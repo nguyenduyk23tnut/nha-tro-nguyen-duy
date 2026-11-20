@@ -1,73 +1,80 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Cơ Sở - {{ coso.TenCoSo }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý cơ sở - {{ coso.TenCoSo }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-100 text-slate-800">
-    <nav class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
-        <div class="font-bold text-lg">
-            <i class="fa-solid fa-sliders text-amber-400 mr-2"></i>Quản trị: {{ coso.TenCoSo }}
-        </div>
-        <a href="/" class="bg-blue-600 hover:bg-blue-500 px-4 py-1.5 rounded-lg text-sm font-medium">
-            <i class="fa-solid fa-arrow-left mr-1"></i> Về trang khách xem
-        </a>
-    </nav>
+<body class="bg-light">
 
-    <main class="max-w-5xl mx-auto p-6">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="mb-4 p-3 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-300 text-sm">
-                  {{ message }}
-              </div>
+  <nav class="navbar navbar-dark bg-dark shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">← Về trang {{ coso.TenCoSo }}</a>
+      <div class="d-flex align-items-center gap-2">
+        <span class="text-light small">Chủ trọ: <b>{{ current_user }}</b></span>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">Đăng xuất</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show py-2" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <h4 class="fw-bold mb-3">Quản lý phòng - {{ coso.TenCoSo }}</h4>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body table-responsive">
+        <table class="table table-bordered align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Phòng</th>
+              <th>Diện tích</th>
+              <th>Giá thuê hiện tại</th>
+              <th>Trạng thái</th>
+              <th>Điều chỉnh (Giá & Trạng thái)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in phongs %}
+            <tr>
+              <td class="fw-bold">{{ p.SoPhong }}</td>
+              <td>{{ p.DienTich }} m²</td>
+              <td>{{ "{:,}".format(p.GiaThue) }} đ</td>
+              <td>
+                {% if p.TrangThai == 'Trong' %}
+                  <span class="badge bg-success">Đang trống</span>
+                {% else %}
+                  <span class="badge bg-secondary">Đã thuê</span>
+                {% endif %}
+              </td>
+              <td>
+                <form action="{{ url_for('cap_nhat_phong', phong_id=p.Id) }}" method="POST" class="d-flex flex-wrap gap-2 align-items-center m-0">
+                  <input type="number" name="gia_thue" value="{{ p.GiaThue }}" class="form-control form-control-sm" style="width: 130px;" step="50000" required>
+                  <select name="trang_thai" class="form-select form-select-sm" style="width: 130px;">
+                    <option value="Trong" {{ 'selected' if p.TrangThai == 'Trong' else '' }}>Đang trống</option>
+                    <option value="DaThue" {{ 'selected' if p.TrangThai == 'DaThue' else '' }}>Đã thuê</option>
+                  </select>
+                  <button type="submit" class="btn btn-primary btn-sm">Lưu</button>
+                </form>
+              </td>
+            </tr>
             {% endfor %}
-          {% endif %}
-        {% endwith %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-        <div class="bg-white rounded-xl shadow p-6">
-            <h2 class="text-xl font-bold mb-4 text-slate-800">Cập nhật trạng thái & giá phòng cơ sở</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead>
-                        <tr class="bg-slate-100 border-b">
-                            <th class="p-3">Tên phòng</th>
-                            <th class="p-3">Diện tích</th>
-                            <th class="p-3">Giá thuê (VNĐ)</th>
-                            <th class="p-3">Trạng thái</th>
-                            <th class="p-3 text-right">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for p in phongs %}
-                        <tr class="border-b hover:bg-slate-50">
-                            <form action="/quan-ly/cap-nhat-phong/{{ p.Id }}" method="POST">
-                                <td class="p-3 font-bold">{{ p.TenPhong }}</td>
-                                <td class="p-3">{{ p.DienTich }} m²</td>
-                                <td class="p-3">
-                                    <input type="number" name="gia_thue" value="{{ p.GiaThue|int }}" class="border rounded px-2 py-1 w-32">
-                                </td>
-                                <td class="p-3">
-                                    <select name="trang_thai" class="border rounded px-2 py-1">
-                                        <option value="Trong" {{ 'selected' if p.TrangThai == 'Trong' else '' }}>Trống</option>
-                                        <option value="DaThue" {{ 'selected' if p.TrangThai == 'DaThue' else '' }}>Đã thuê</option>
-                                    </select>
-                                </td>
-                                <td class="p-3 text-right">
-                                    <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 font-medium">
-                                        Lưu thay đổi
-                                    </button>
-                                </td>
-                            </form>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

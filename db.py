@@ -77,7 +77,7 @@ def init_sqlite_db():
         for i in range(1, 11):
             so_phong = f"Phòng {100 + i}"
             dien_tich = 18 if i <= 5 else 22
-            gia_thue = 800000 if i <= 5 else 1000000
+            gia_thue = 1500000 if i <= 5 else 2000000
             trang_thai = 'Trong' if i % 2 == 1 else 'DaThue'
             mo_ta = f"Phòng khép kín diện tích {dien_tich}m2, có gác xép, nóng lạnh, wifi tốc độ cao."
             cursor.execute("""
